@@ -88,11 +88,7 @@ def nc2_bear_status(bear):
                 ncs = nc2_cluster_status()
             else:
                 while ncs == "resume_failed":
-                    print(
-                        "***BAD "
-                        + ncs
-                        + " BAD*** TAKING COUNTER MEASURES!!!!"
-                    )
+                    print("***BAD " + ncs + " BAD*** TAKING COUNTER MEASURES!!!!")
                     time.sleep(600)
 
                     """The code area below is in development"""
