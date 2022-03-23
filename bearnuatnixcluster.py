@@ -85,6 +85,7 @@ def nc2_bear_status(bear):
             ):
                 print("***" + ncs + "***")
                 time.sleep(60)
+                ncs = nc2_cluster_status()
             else:
                 while ncs == "resume_failed":
                     print(
@@ -139,6 +140,7 @@ def nc2_bear_status(bear):
                 ):
                     print("***" + ncs + "***")
                     time.sleep(60)
+                    ncs = nc2_cluster_status()
 
             pcvm_status(TRANSITION_PAYLOAD="ON")
 
@@ -159,6 +161,7 @@ def nc2_bear_status(bear):
             ):
                 print("***" + ncs + "***")
                 time.sleep(60)
+                ncs = nc2_cluster_status()
         else:
             print("no valid parm set (resume_cluster,hibernate)")
 
