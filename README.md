@@ -1,4 +1,4 @@
-# nutanix-NC2-
+# nutanix-NC2
 
 Nutanix Cluster scripts
 
