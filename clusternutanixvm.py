@@ -17,13 +17,14 @@ logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 
 def pcvm_status(TRANSITION_PAYLOAD="ON"):
     """Status and setting of the Prism Central VM in the cluster"""
+    ncs = nc2_cluster_status()
     if (
         (TRANSITION_PAYLOAD == "ON")
-        and (nc2_cluster_status() != "hibernated")
+        and (ncs != "hibernated")
         or (TRANSITION_PAYLOAD == "OFF")
-        and (nc2_cluster_status() == "running")
+        and (ncs() == "running")
         or (TRANSITION_PAYLOAD == "ACPI_SHUTDOWN")
-        and (nc2_cluster_status() == "running")
+        and (ncs() == "running")
     ):
 
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -38,8 +39,6 @@ def pcvm_status(TRANSITION_PAYLOAD="ON"):
         PRISMCENTRAL_VMDESC = os.getenv("PRISMCENTRAL_VMDESC")
         PRISMCENTRAL_TOGGLE = os.getenv("PRISMCENTRAL_TOGGLE")
         OUTPUT = os.getenv("OUTPUT")
-
-        nc2_cluster_status()
 
         # load the script configuration
         env_path_nc2 = Path(OUTPUT) / "NC2clusterinfo.txt"
@@ -246,7 +245,7 @@ def pcvm_status(TRANSITION_PAYLOAD="ON"):
                 else:
                     logging.info(
                         "*** cluster is "
-                        + nc2_cluster_status()
+                        + ncs
                         + " *** power set "
                         + TRANSITION_PAYLOAD
                         + " for Prism Central VM current power setting is "

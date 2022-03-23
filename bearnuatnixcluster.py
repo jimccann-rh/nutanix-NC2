@@ -19,7 +19,7 @@ logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 
 def nc2_bear_status(bear):
     """To wake up the "bear" cluster or put the "bear" cluster to sleep this will also toggle the prism central vm to be power on or off"""
-    nc2_cluster_status()
+    ncs = nc2_cluster_status()
 
     # load the script configuration
     env_path_env = Path(".") / ".env"
@@ -77,36 +77,67 @@ def nc2_bear_status(bear):
             # logging.info(hibernate_req)
             # logging.info(hibernate_req.json())
             while (
-                (nc2_cluster_status() == "hibernated")
-                or (nc2_cluster_status() == "starting_nodes")
-                or (nc2_cluster_status() == "starting_services")
-                or (nc2_cluster_status() == "resuming")
-                or (nc2_cluster_status() == "starting")
+                (ncs == "hibernated")
+                or (ncs == "starting_nodes")
+                or (ncs == "starting_services")
+                or (ncs == "resuming")
+                or (ncs == "starting")
             ):
-                print("***" + nc2_cluster_status() + "***")
+                print("***" + ncs + "***")
                 time.sleep(60)
             else:
-                while nc2_cluster_status() == "resume_failed":
+                while ncs == "resume_failed":
                     print(
                         "***BAD "
-                        + nc2_cluster_status()
+                        + ncs
                         + " BAD*** TAKING COUNTER MEASURES!!!!"
                     )
                     time.sleep(600)
 
                     """The code area below is in development"""
                     # ~/cluster/bin$ python resume_hibernate_resume --workflow=resume
+                    # dir = os.getcwd()
+                    # print(dir)
+                    # ping to see if cluster IP is up it should come up after the cluster is online
+                    # cmd = ['ping', '-c2', '-W 5', PE_IP ]
+                    #
+                    #
+                    # cmd = ['ssh', '-i /home/jimb0/nutanix-NC2-/development-sts.pem', 'ec2-user@3.129.209.238', 'allssh genesis restart;','allssh genesis stop prism;','cluster start']
+                    # cmd = ["ssh -i /home/jimb0/nutanix-NC2-/development-sts.pem ec2-user@3.129.209.238 'allssh genesis restart; allssh genesis stop prism; cluster start'"]
+                    # cmd = ["ssh -i /home/jimb0/nutanix-NC2-/development-sts.pem ec2-user@3.129.209.238 'cm.sh'"]
+                    # response = subprocess.Popen("ssh -i /home/jimb0/nutanix-NC2-/development-sts.pem {user}@{host} {cmd}".format(user='ec2-user', host='3.129.209.238', cmd='allssh genesis restart; allssh genesis stop prism; cluster start'), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+                    # stdout, stderr = response.communicate()
 
+                    # print(response)
+                    # print(response.communicate())
+                    # print(cmd)
+                    # done = False
+                    # time.sleep(10)
+                    # timeout = 10 # default time out after 1000 times, set to -1 to disable timeout
+
+                    # logging.info("Waiting for cluster IP to come on-line.")
+
+                    # while not done and timeout:
+                    #    response = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+                    #    stdout, stderr = response.communicate()
+                    #    if response.returncode == 0:
+                    #        print("Server up!")
+                    #        done = True
+                    #    else:
+                    #        sys.stdout.write('.')
+                    #        timeout -= 1
+                # if not done:
+                #    logging.info("\nCluster failed to respond")
                 """'Code above is in active development"""
 
                 while (
-                    (nc2_cluster_status() == "hibernated")
-                    or (nc2_cluster_status() == "starting_nodes")
-                    or (nc2_cluster_status() == "starting_services")
-                    or (nc2_cluster_status() == "resuming")
-                    or (nc2_cluster_status() == "starting")
+                    (ncs == "hibernated")
+                    or (ncs == "starting_nodes")
+                    or (ncs == "starting_services")
+                    or (ncs == "resuming")
+                    or (ncs == "starting")
                 ):
-                    print("***" + nc2_cluster_status() + "***")
+                    print("***" + ncs + "***")
                     time.sleep(60)
 
             pcvm_status(TRANSITION_PAYLOAD="ON")
@@ -120,13 +151,13 @@ def nc2_bear_status(bear):
             logging.debug(hibernate_req)
             # logging.info(hibernate_req.json())
             while (
-                (nc2_cluster_status() == "running")
-                or (nc2_cluster_status() == "hibernating")
-                or (nc2_cluster_status() == "stopping_nodes")
-                or (nc2_cluster_status() == "stopping_services")
-                or (nc2_cluster_status() == "resuming")
+                (ncs == "running")
+                or (ncs == "hibernating")
+                or (ncs == "stopping_nodes")
+                or (ncs == "stopping_services")
+                or (ncs == "resuming")
             ):
-                print("***" + nc2_cluster_status() + "***")
+                print("***" + ncs + "***")
                 time.sleep(60)
         else:
             print("no valid parm set (resume_cluster,hibernate)")
