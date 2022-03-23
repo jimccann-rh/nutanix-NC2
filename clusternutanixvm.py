@@ -22,9 +22,9 @@ def pcvm_status(TRANSITION_PAYLOAD="ON"):
         (TRANSITION_PAYLOAD == "ON")
         and (ncs != "hibernated")
         or (TRANSITION_PAYLOAD == "OFF")
-        and (ncs() == "running")
+        and (ncs == "running")
         or (TRANSITION_PAYLOAD == "ACPI_SHUTDOWN")
-        and (ncs() == "running")
+        and (ncs == "running")
     ):
 
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
