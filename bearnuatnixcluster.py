@@ -59,37 +59,36 @@ def nc2_bear_status(bear):
             "X-Frame-Signature": signature,
         }
 
-        # hibernate_req = requests.post(DOMAIN + "/v1/clusters/" + CLUSTER_ID + "/" + bear, headers=headers)
-        # hibernate_req = requests.post(DOMAIN + "/v1/clusters/" + CLUSTER_ID + "/resume_cluster", headers=headers)
-
         logging.info(headers)
-        # logging.info(hibernate_req)
-        # logging.info(hibernate_req.json())
 
         # https://docs.frame.nutanix.com/frame-apis/admin-api/admin-api.html
         # https://cpanel-backend-prod.frame.nutanix.com/api/v1/docs/clusters/index.html#/
 
         if bear == "resume_cluster":
             # query status of cluster
-            hibernate_req = requests.post(
-                DOMAIN + "/v1/clusters/" + CLUSTER_ID + "/" + bear, headers=headers
-            )
-            # logging.info(hibernate_req)
-            # logging.info(hibernate_req.json())
-            while (
-                (ncs == "hibernated")
-                or (ncs == "starting_nodes")
-                or (ncs == "starting_services")
-                or (ncs == "resuming")
-                or (ncs == "starting")
-            ):
-                print("***" + ncs + "***")
-                time.sleep(60)
-                ncs = nc2_cluster_status()
+
+            if ncs == "hibernated":
+
+                hibernate_req = requests.post(
+                    DOMAIN + "/v1/clusters/" + CLUSTER_ID + "/" + bear, headers=headers
+                )
+                logging.info(hibernate_req)
+                # logging.info(hibernate_req.json())
+                while (
+                    (ncs == "hibernated")
+                    or (ncs == "starting_nodes")
+                    or (ncs == "starting_services")
+                    or (ncs == "resuming")
+                    or (ncs == "starting")
+                ):
+                    print("***" + ncs + "***")
+                    time.sleep(60)
+                    ncs = nc2_cluster_status()
             else:
                 while ncs == "resume_failed":
                     print("***BAD " + ncs + " BAD*** TAKING COUNTER MEASURES!!!!")
                     time.sleep(600)
+                    ncs = nc2_cluster_status()
 
                     """The code area below is in development"""
                     # ~/cluster/bin$ python resume_hibernate_resume --workflow=resume
@@ -143,21 +142,24 @@ def nc2_bear_status(bear):
         elif bear == "hibernate":
             # query status of cluster
             pcvm_status(TRANSITION_PAYLOAD="ACPI_SHUTDOWN")
-            hibernate_req = requests.post(
-                DOMAIN + "/v1/clusters/" + CLUSTER_ID + "/" + bear, headers=headers
-            )
-            logging.debug(hibernate_req)
-            # logging.info(hibernate_req.json())
-            while (
-                (ncs == "running")
-                or (ncs == "hibernating")
-                or (ncs == "stopping_nodes")
-                or (ncs == "stopping_services")
-                or (ncs == "resuming")
-            ):
-                print("***" + ncs + "***")
-                time.sleep(60)
-                ncs = nc2_cluster_status()
+
+            if ncs == "running":
+
+                hibernate_req = requests.post(
+                    DOMAIN + "/v1/clusters/" + CLUSTER_ID + "/" + bear, headers=headers
+                )
+                logging.debug(hibernate_req)
+                # logging.info(hibernate_req.json())
+                while (
+                    (ncs == "running")
+                    or (ncs == "hibernating")
+                    or (ncs == "stopping_nodes")
+                    or (ncs == "stopping_services")
+                    or (ncs == "resuming")
+                ):
+                    print("***" + ncs + "***")
+                    time.sleep(60)
+                    ncs = nc2_cluster_status()
         else:
             print("no valid parm set (resume_cluster,hibernate)")
 
