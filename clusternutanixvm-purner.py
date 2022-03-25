@@ -8,7 +8,6 @@ import time
 from base64 import b64encode
 from pathlib import Path
 
-# trunk-ignore(flake8/F401)
 # import click
 import requests
 import urllib3
@@ -19,7 +18,7 @@ from clusternutanix import nc2_cluster_status
 
 logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 
-DELETE_THRESHOLD = 24  #: threshold for deleting vpc resources in hours
+DELETE_THRESHOLD = 1  #: threshold for deleting vpc resources in hours
 
 
 def determine_age_in_hours(date_string) -> int:
@@ -46,7 +45,7 @@ def check_key_exist(test_dict, key):
         return False
 
 
-def vms_prune():   # noqa: max-complexity=12
+def vms_prune():  # noqa: max-complexity=12
     """Prune VMs in the cluster"""
     ncs = nc2_cluster_status()
 
@@ -118,6 +117,7 @@ def vms_prune():   # noqa: max-complexity=12
         logging.info("*************")
         # logging.info(info['entities'])
         todelete = ""
+        toberemove = ""
         for entity in info["entities"]:
             logging.debug(entity)
             vm_uuid = entity["metadata"]["uuid"]
@@ -142,7 +142,6 @@ def vms_prune():   # noqa: max-complexity=12
             logging.info(deleteme)
             # todelete = " ".join([todelete, vm_uuid]).lstrip()
 
-            toberemove = ""
             if deleteme:
                 todelete = f"{todelete} {vm_uuid}".lstrip()
                 # logging.info(todelete)
@@ -164,7 +163,6 @@ def vms_prune():   # noqa: max-complexity=12
 
         for x in toberemove:
             print(f"DELETED {x}")
-            # trunk-ignore(flake8/F841)
             request_url2 = "https://%s:%s/api/nutanix/v3/vms/%s" % (
                 PE_IP,
                 PE_PORT,
@@ -174,6 +172,8 @@ def vms_prune():   # noqa: max-complexity=12
             # response2 = requests.request("delete", request_url2, data=payload, headers=headers, verify=False)
             logging.debug(request_url2)
             time.sleep(1)
+        count = len(toberemove)
+        logging.info("There were " + str(count) + " VMs REMOVED!")
 
 
 if __name__ == "__main__":
