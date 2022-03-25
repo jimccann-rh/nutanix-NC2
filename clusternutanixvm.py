@@ -15,7 +15,7 @@ from clusternutanix import nc2_cluster_status
 logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 
 
-def pcvm_status(TRANSITION_PAYLOAD="ON"):
+def pcvm_status(TRANSITION_PAYLOAD="ON"):  # noqa: max-complexity=12
     """Status and setting of the Prism Central VM in the cluster"""
     ncs = nc2_cluster_status()
     if (
@@ -44,12 +44,9 @@ def pcvm_status(TRANSITION_PAYLOAD="ON"):
         env_path_nc2 = Path(OUTPUT) / "NC2clusterinfo.txt"
         load_dotenv(dotenv_path=env_path_nc2)
         PE_IP = os.getenv("PE_IP")
-        # trunk-ignore(flake8/F841)
-        AHV = os.getenv("AHV")
-        # trunk-ignore(flake8/F841)
-        CVM = os.getenv("CVM")
-        # trunk-ignore(flake8/F841)
-        VER = os.getenv("VER")
+        # AHV = os.getenv("AHV")
+        # CVM = os.getenv("CVM")
+        # VER = os.getenv("VER")
 
         # ping to see if cluster IP is up it should come up after the cluster is online
         cmd = ["ping", "-c2", "-W 5", PE_IP]

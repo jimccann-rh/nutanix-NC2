@@ -34,11 +34,11 @@ def nc2_bear_status(bear):
     env_path_nc2 = Path(OUTPUT) / "NC2clusterinfo.txt"
     load_dotenv(dotenv_path=env_path_nc2)
     # trunk-ignore(flake8/F841)
-    PE_IP = os.getenv("PE_IP")
+    # PE_IP = os.getenv("PE_IP")
     # trunk-ignore(flake8/F841)
-    AHV = os.getenv("AHV")
+    # AHV = os.getenv("AHV")
     # trunk-ignore(flake8/F841)
-    CVM = os.getenv("CVM")
+    # CVM = os.getenv("CVM")
     VER = os.getenv("VER")
 
     if VER >= "6.0.1.1":
