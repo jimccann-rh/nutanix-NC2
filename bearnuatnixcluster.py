@@ -8,6 +8,7 @@ import sys
 import time
 from pathlib import Path
 
+import click
 import requests
 from dotenv import load_dotenv
 
@@ -17,6 +18,8 @@ from clusternutanixvm import pcvm_status
 logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 
 
+@click.command()
+@click.option("--bear", default="", help="resume_cluster,hibernate")
 def nc2_bear_status(bear):
     """To wake up the "bear" cluster or put the "bear" cluster to sleep this will also toggle the prism central vm to be power on or off"""
     ncs = nc2_cluster_status()
@@ -33,11 +36,8 @@ def nc2_bear_status(bear):
     # load the script configuration
     env_path_nc2 = Path(OUTPUT) / "NC2clusterinfo.txt"
     load_dotenv(dotenv_path=env_path_nc2)
-    # trunk-ignore(flake8/F841)
     # PE_IP = os.getenv("PE_IP")
-    # trunk-ignore(flake8/F841)
     # AHV = os.getenv("AHV")
-    # trunk-ignore(flake8/F841)
     # CVM = os.getenv("CVM")
     VER = os.getenv("VER")
 
@@ -165,8 +165,4 @@ def nc2_bear_status(bear):
 
 
 if __name__ == "__main__":
-    # nc2_bear_status()
-    locals().get(
-        sys.argv[2],
-        "parameter *resume_cluster* or *hibernate* and function *nc2_bear_status* not found",
-    )(sys.argv[1])
+    nc2_bear_status()

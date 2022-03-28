@@ -4,11 +4,14 @@ import logging
 import os
 import subprocess
 import sys
+
+# trunk-ignore(flake8/F401)
 import time
 from base64 import b64encode
 from pathlib import Path
 
-# import click
+# trunk-ignore(flake8/F401)
+import click
 import requests
 import urllib3
 from dateutil import parser
@@ -18,7 +21,7 @@ from clusternutanix import nc2_cluster_status
 
 logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 
-DELETE_THRESHOLD = 1  #: threshold for deleting vpc resources in hours
+DELETE_THRESHOLD = 24  #: threshold for deleting vpc resources in hours
 
 
 def determine_age_in_hours(date_string) -> int:
@@ -32,14 +35,14 @@ def determine_age_in_hours(date_string) -> int:
 
 def is_expired(object_age: float) -> bool:
     """Check if the object age is above the threshold and return either True or False"""
-    logging.info("object age in hours : " + str(object_age))
+    logging.debug("object age in hours : " + str(object_age))
     return object_age - DELETE_THRESHOLD > 0
 
 
 def check_key_exist(test_dict, key):
     try:
         value = test_dict[key]
-        logging.info(value)
+        logging.debug(value)
         return True
     except KeyError:
         return False
@@ -86,7 +89,7 @@ def vms_prune():  # noqa: max-complexity=12
             response = subprocess.Popen(cmd, stdout=subprocess.PIPE)
             stdout, stderr = response.communicate()
             if response.returncode == 0:
-                print("Server up!")
+                logging.info("Server up!")
                 done = True
             else:
                 sys.stdout.write(".")
@@ -129,8 +132,8 @@ def vms_prune():  # noqa: max-complexity=12
             else:
                 vm_description = ""
 
-            print("VM found in cluster")
-            print(
+            logging.debug("VM found in cluster")
+            logging.debug(
                 "********* " + vm_uuid,
                 vm_creation,
                 vm_name,
@@ -139,7 +142,7 @@ def vms_prune():  # noqa: max-complexity=12
             howlong = determine_age_in_hours(vm_creation)
             logging.debug("how old ami " + str(howlong))
             deleteme = is_expired(howlong)
-            logging.info(deleteme)
+            logging.debug(deleteme)
             # todelete = " ".join([todelete, vm_uuid]).lstrip()
 
             if deleteme:
@@ -152,29 +155,39 @@ def vms_prune():  # noqa: max-complexity=12
                 if vm_description == PRISMCENTRAL_VMDESC:
                     VM_EXCEPTIONS.append(vm_uuid)
 
-                logging.info(f"These VMs are excepctions to be pruned {VM_EXCEPTIONS}")
+                logging.debug(f"These VMs are excepctions to be pruned {VM_EXCEPTIONS}")
                 toberemove = list(set(listtodelete) - set(VM_EXCEPTIONS))
                 # print("TOREMOVE***" + str(toberemove))
-                print(f"These VMs will be pruned *** {toberemove}")
+                logging.debug(f"These VMs will be pruned *** {toberemove}")
 
             else:
-                print(f"nothing to be done to this vm {vm_name} {vm_uuid}")
-                print("*******************")
+                logging.debug(f"nothing to be done to this vm {vm_name} {vm_uuid}")
+                logging.debug("*******************")
 
         for x in toberemove:
-            print(f"DELETED {x}")
+            logging.info(f"DELETED {x}")
             request_url2 = "https://%s:%s/api/nutanix/v3/vms/%s" % (
                 PE_IP,
                 PE_PORT,
                 x,
             )
             # danger
-            # response2 = requests.request("delete", request_url2, data=payload, headers=headers, verify=False)
-            logging.debug(request_url2)
-            time.sleep(1)
+            response2 = requests.request(
+                "delete", request_url2, data=payload, headers=headers, verify=False
+            )
+            logging.info(response2)
+            # time.sleep(1)
         count = len(toberemove)
         logging.info("There were " + str(count) + " VMs REMOVED!")
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
+#    vms_prune()
+
+
+def main() -> None:
     vms_prune()
+
+
+if __name__ == "__main__":
+    main()

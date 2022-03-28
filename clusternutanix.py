@@ -87,10 +87,11 @@ def nc2_cluster_status():
         )
         # if node hibernated cvm state will be none.
         if (
-            (jsonResponse["cluster_state"] != "hibernated")
-            or (jsonResponse["cluster_state"] != "starting")
-            or (jsonResponse["cluster_state"] != "resuming")
+            (jsonResponse["cluster_state"] != "starting")
+            and (jsonResponse["cluster_state"] != "resuming")
+            and (jsonResponse["cluster_state"] != "hibernated")
         ):
+
             logging.info(
                 "CVM "
                 + jsonResponse["hosts"][i]["cvm_ip"]
