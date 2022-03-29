@@ -85,6 +85,8 @@ def vms_prune():  # noqa: max-complexity=12
             PE_IP = socket.gethostbyname(PE_LB)
         logging.info(PE_IP)
 
+        logging.info("Waiting for cluster IP to come on-line.")
+
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(300)  # 300 Second Timeout
         result = sock.connect_ex((PE_IP, int(PE_PORT)))
@@ -100,7 +102,7 @@ def vms_prune():  # noqa: max-complexity=12
 #            1000  # default time out after 1000 times, set to -1 to disable timeout
 #        )
 
-        logging.info("Waiting for cluster IP to come on-line.")
+
 
 #        while not done and timeout:
 #            response = subprocess.Popen(cmd, stdout=subprocess.PIPE)
