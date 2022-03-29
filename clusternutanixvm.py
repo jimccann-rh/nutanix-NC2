@@ -88,7 +88,7 @@ def pcvm_status(TRANSITION_PAYLOAD="ON"):  # noqa: max-complexity=12
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(300)  # 300 Second Timeout
-        result = sock.connect_ex((PE_IP, PE_PORT))
+        result = sock.connect_ex((PE_IP, int(PE_PORT)))
         if result == 0:
             logging.info("port OPEN")
         else:
