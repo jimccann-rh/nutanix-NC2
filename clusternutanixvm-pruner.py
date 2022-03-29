@@ -2,6 +2,7 @@
 import datetime
 import logging
 import os
+import socket
 import subprocess
 import sys
 
@@ -78,24 +79,41 @@ def vms_prune():  # noqa: max-complexity=12
         load_dotenv(dotenv_path=env_path_nc2)
         PE_IP = os.getenv("PE_IP")
 
-        # ping to see if cluster IP is up it should come up after the cluster is online
-        cmd = ["ping", "-c2", "-W 5", PE_IP]
-        done = False
-        timeout = (
-            1000  # default time out after 1000 times, set to -1 to disable timeout
-        )
+        PE_LB = None
+        PE_LB = os.getenv("PE_LB")
+        if PE_LB is not None:
+            PE_IP = socket.gethostbyname(PE_LB)
+        logging.info(PE_IP)
+
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(300)  # 300 Second Timeout
+        result = sock.connect_ex((PE_IP, PE_PORT))
+        if result == 0:
+            logging.info("port OPEN")
+        else:
+            logging.info("port CLOSED, connect_ex returned: " + str(result))
+
+#        # ping to see if cluster IP is up it should come up after the cluster is online
+#        cmd = ["ping", "-c2", "-W 5", PE_IP]
+#        done = False
+#        timeout = (
+#            1000  # default time out after 1000 times, set to -1 to disable timeout
+#        )
+
         logging.info("Waiting for cluster IP to come on-line.")
-        while not done and timeout:
-            response = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-            stdout, stderr = response.communicate()
-            if response.returncode == 0:
-                logging.info("Server up!")
-                done = True
-            else:
-                sys.stdout.write(".")
-                timeout -= 1
-        if not done:
-            logging.info("\nCluster failed to respond")
+
+#        while not done and timeout:
+#            response = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+#            stdout, stderr = response.communicate()
+#            if response.returncode == 0:
+#                logging.info("Server up!")
+#                done = True
+#            else:
+#                sys.stdout.write(".")
+#                timeout -= 1
+#        if not done:
+#            logging.info("\nCluster failed to respond")
+
         # Get logged in and get list of vms
         request_url = "https://%s:%s/api/nutanix/v3/vms/list" % (PE_IP, PE_PORT)
         encoded_credentials = b64encode(

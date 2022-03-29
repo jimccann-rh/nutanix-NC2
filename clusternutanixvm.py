@@ -63,7 +63,7 @@ def pcvm_status(TRANSITION_PAYLOAD="ON"):  # noqa: max-complexity=12
         PE_LB = os.getenv("PE_LB")
         if PE_LB is not None:
             PE_IP = socket.gethostbyname(PE_LB)
-        print(PE_IP)
+        logging.info(PE_IP)
 
         # ping to see if cluster IP is up it should come up after the cluster is online
         # cmd = ["ping", "-c2", "-W 5", PE_IP]
@@ -88,7 +88,7 @@ def pcvm_status(TRANSITION_PAYLOAD="ON"):  # noqa: max-complexity=12
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(300)  # 300 Second Timeout
-        result = sock.connect_ex((PE_IP, 9440))
+        result = sock.connect_ex((PE_IP, PE_PORT))
         if result == 0:
             logging.info("port OPEN")
         else:
