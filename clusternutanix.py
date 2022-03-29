@@ -23,7 +23,16 @@ DOMAIN = os.getenv("DOMAIN")
 OUTPUT = os.getenv("OUTPUT")
 
 
-def nc2_cluster_status():
+def check_key_exist(test_dict, key):
+    try:
+        value = test_dict[key]
+        logging.info(value)
+        return True
+    except KeyError:
+        return False
+
+
+def nc2_cluster_status(): # noqa: max-complexity=12
     """Get hibernation/running status of cluster"""
     logging.info("Getting hibernation status of cluster %s", (CLUSTER_ID))
 
@@ -121,6 +130,9 @@ def nc2_cluster_status():
         file3.write("CVM=" + str(datalistcvm) + "\n")
         if jsonResponse["cluster_state"] == "running":
             file3.write("PE_IP=" + jsonResponse["cluster_service_ip"] + "\n")
+            key_to_lookup = "load_balancer_dns_name"
+            if check_key_exist(jsonResponse, key_to_lookup):
+                file3.write("PE_LB=" + jsonResponse["load_balancer_dns_name"] + "\n")
 
     # https://docs.frame.nutanix.com/frame-apis/admin-api/admin-api.html
     # https://cpanel-backend-prod.frame.nutanix.com/api/v1/docs/clusters/index.html#/

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import logging
 import os
-import subprocess
+import socket
 import sys
 from base64 import b64encode
 from pathlib import Path
@@ -12,8 +12,20 @@ from dotenv import load_dotenv
 
 from clusternutanix import nc2_cluster_status
 
+# import subprocess
+
+# from contextlib import closing
+
 logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 
+# def check_socket(host, port):
+#    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
+#        if sock.connect_ex((host, port)) == 0:
+#            print("Port is open")
+#            return 0
+#        else:
+#            print("Port is not open")
+#            return 1
 
 def pcvm_status(TRANSITION_PAYLOAD="ON"):  # noqa: max-complexity=12
     """Status and setting of the Prism Central VM in the cluster"""
@@ -47,25 +59,40 @@ def pcvm_status(TRANSITION_PAYLOAD="ON"):  # noqa: max-complexity=12
         # AHV = os.getenv("AHV")
         # CVM = os.getenv("CVM")
         # VER = os.getenv("VER")
+        PE_LB = None
+        PE_LB = os.getenv("PE_LB")
+        if PE_LB is not None:
+            PE_IP = socket.gethostbyname(PE_LB)
+        print(PE_IP)
 
         # ping to see if cluster IP is up it should come up after the cluster is online
-        cmd = ["ping", "-c2", "-W 5", PE_IP]
-        done = False
-        timeout = -1  # default time out after 1000 times, set to -1 to disable timeout
+        # cmd = ["ping", "-c2", "-W 5", PE_IP]
+
+        # done = False
+        # timeout = -1  # default time out after 1000 times, set to -1 to disable timeout
 
         logging.info("Waiting for cluster IP to come on-line.")
 
-        while not done and timeout:
-            response = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-            stdout, stderr = response.communicate()
-            if response.returncode == 0:
-                print("Server up!")
-                done = True
-            else:
-                sys.stdout.write(".")
-                timeout -= 1
-        if not done:
-            logging.info("\nCluster failed to respond")
+        #        while not done and timeout:
+        #            response = check_socket(PE_IP, 9400)
+        #            #response = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+        #            #stdout, stderr = response.communicate()
+        #            if response.returncode == 0:
+        #                print("Server up!")
+        #                done = True
+        #            else:
+        #                sys.stdout.write(".")
+        #                timeout -= 1
+        #        if not done:
+        #            logging.info("\nCluster failed to respond")
+
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(300)  # 300 Second Timeout
+        result = sock.connect_ex((PE_IP, 9440))
+        if result == 0:
+            logging.info("port OPEN")
+        else:
+            logging.info("port CLOSED, connect_ex returned: " + str(result))
 
         # Get logged in and get list of vms
         request_url = "https://%s:%s/api/nutanix/v3/vms/list" % (PE_IP, PE_PORT)
